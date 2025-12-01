@@ -1,66 +1,121 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+import { useState } from 'react';
 
 export default function Home() {
+  const [vacancy, setVacancy] = useState('');
+  const [resume, setResume] = useState('');
+  const [adaptedResume, setAdaptedResume] = useState('');
+  const [recommendations, setRecommendations] = useState('');
+  const [chances, setChances] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false)
+  const parseResume = (text: string) => {
+    if (!text) return '';
+  
+    let parsed = text
+      // Добавленный: [[+ДОБАВЛЕНО]]
+      .replace(/\[\[\+([^\]]+)\]\]/g, '<mark class="added">$1</mark>')
+      // Измененный: [[~БЫЛО→СТАЛО]]
+      .replace(/\[\[~([^→]+)→([^\]]+)\]\]/g, '<del>$1</del> → <ins>$2</ins>')
+      // Перемещенный: [[^ПЕРЕМЕЩЕНО]]
+      .replace(/\[\[\^([^\]]+)\]\]/g, '<span class="moved">$1</span>');
+  
+    return parsed;
+  };
+  const validateForm = () => {
+    if (!vacancy.trim() || !resume.trim()) {
+      setError('Заполните все поля');
+      return false;
+    } else {
+      setError('');
+      return true
+    }
+  }
+  const handleSubmit = async () =>{
+    if (!validateForm()) {
+      return;
+    }
+    setAdaptedResume('');
+    setRecommendations('');
+    setChances('');
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type':'application/json',
+        },
+        body: JSON.stringify({
+          vacancy: vacancy,
+          resume: resume,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok || data.error) {
+        setError(data.error || 'Произошла ошибка')
+        return;
+      }
+
+      setAdaptedResume(data.adaptedResume || '');
+      setRecommendations(data.recommendations || '');
+      setChances(data.chances || '');
+    } catch (error) {
+      setError('Произошла ошибка при обработке запроса');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className = 'form-container'>
+      <h1 className = 'Title'> Адаптируй резюме под вакансию </h1>
+      <div className = 'block'>
+        <label> Скопируй и вставь текст вакансии: </label>
+        <textarea
+          value={vacancy}
+          onChange={(e)=>setVacancy(e.target.value)}
+          rows = {10}
         />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+      </div>
+      <div className = 'block'>
+        <label> Скопируй и вставь текст резюме: </label>
+        <textarea
+          value={resume}
+          onChange={(e)=>setResume(e.target.value)}
+          rows = {10}
+        />
+      </div>
+      <button 
+        onClick={handleSubmit}
+        disabled={isLoading}>
+        {isLoading ? 'Обработка...' : 'Адаптировать'}
+      </button>
+      {error && <div style={{ color: 'red' }}>{error}</div>}
+      <div className = 'block'>
+        <label>Адаптированное резюме:</label>
+        <div 
+          className="resume-output"
+          dangerouslySetInnerHTML={{ __html: parseResume(adaptedResume) }}
+        />
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      <div className = 'block'>
+        <label>Рекомендации по подготовке к интервью:</label> 
+        <div
+          className="resomendations-output"
+          dangerouslySetInnerHTML={{ __html: parseResume(recommendations) }}
+        >
         </div>
-      </main>
+      </div>
+      <div className='result'>
+        <label>Оценка шансов:</label>
+        <div>
+          {chances ? chances :''}
+        </div>
+      </div>
     </div>
   );
 }
