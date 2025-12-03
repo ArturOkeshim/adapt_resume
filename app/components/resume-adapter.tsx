@@ -167,7 +167,13 @@ export default function ResumeAdapter() {
         <button className={styles.submitButton} onClick={handleSubmit} disabled={state.isLoading}>
           {state.isLoading ? "Обработка..." : "Адаптировать"}
         </button>
-
+        {/* Chances */}
+        {state.chances && (
+          <div className={styles.outputCard}>
+            <h2 className={styles.outputTitle}>Насколько получилось увеличить соответствие вакансии?</h2>
+            <div className={styles.chancesContent}>{state.chances}</div>
+          </div>
+        )}
         {/* Output Section */}
         {(state.adaptedResume || state.recommendations || state.chances) && (
           <section className={styles.outputSection}>
@@ -211,13 +217,7 @@ export default function ResumeAdapter() {
               </div>
             )}
 
-            {/* Chances */}
-            {state.chances && (
-              <div className={styles.outputCard}>
-                <h2 className={styles.outputTitle}>Оценка шансов</h2>
-                <div className={styles.chancesContent}>{state.chances}</div>
-              </div>
-            )}
+
           </section>
         )}
       </div>

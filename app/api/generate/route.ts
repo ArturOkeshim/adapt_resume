@@ -6,6 +6,7 @@ export async function POST(request: Request) {
     const { vacancy, resume } = await request.json();
     const BASE_URL = "https://api.vsegpt.ru/v1"
     const TEMPERATURE = 0.3;
+    let LANG = 'русский'
     const formatAIResponse = (text: string) => {
       if (!text) return '';
       
@@ -162,7 +163,8 @@ export async function POST(request: Request) {
 
         Будь смелым в формулировках в рамках допустимого.
 
-        Язык вакансии — твой язык. Максимально используй термины из описания вакансии.
+        Основной язык резюме — ${LANG}, но можешь использовать иностранные слова, терминологию, если нужно.
+        Максимально используй термины из описания вакансии.
 
         Подсветка должна быть полезной, но не загромождать текст.
     `
