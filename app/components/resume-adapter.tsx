@@ -11,6 +11,7 @@ interface AdapterState {
   chances: string
   error: string
   isLoading: boolean
+  showChanges: boolean
 }
 
 export default function ResumeAdapter() {
@@ -22,20 +23,31 @@ export default function ResumeAdapter() {
     chances: "",
     error: "",
     isLoading: false,
+    showChanges: true
   })
 
   // Parse special markup: [[+text]], [[~old→new]], [[^text]]
-  const parseResume = (text: string) => {
+  const parseResume = (text: string, showChanges: boolean = true) => {
     if (!text) return '';
   
     let parsed = text
-      // Добавленный: [[+ДОБАВЛЕНО]]
-      .replace(/\[\[\+([^\]]+)\]\]/g, '<mark class="added">$1</mark>')
-      // Измененный: [[~БЫЛО→СТАЛО]]
-      .replace(/\[\[~([^→]+)→([^\]]+)\]\]/g, '<del>$1</del> → <ins>$2</ins>')
-      // Перемещенный: [[^ПЕРЕМЕЩЕНО]]
-      .replace(/\[\[\^([^\]]+)\]\]/g, '<span class="moved">$1</span>')
-      .replace(/\n/g, "<br />");  // ← ДОБАВЬ, если нужны переносы строк
+
+    if (showChanges) {
+      parsed = parsed
+        // Добавленный: [[+ДОБАВЛЕНО]]
+        .replace(/\[\[\+([^\]]+)\]\]/g, '<mark class="added">$1</mark>')
+        // Измененный: [[~БЫЛО→СТАЛО]]
+        .replace(/\[\[~([^→]+)→([^\]]+)\]\]/g, '<del>$1</del> → <ins>$2</ins>')
+        // Перемещенный: [[^ПЕРЕМЕЩЕНО]]
+        .replace(/\[\[\^([^\]]+)\]\]/g, '<span class="moved">$1</span>')
+        .replace(/\n/g, "<br />");  // ← ДОБАВЬ, если нужны переносы строк
+    } else {
+      parsed=parsed
+        .replace(/\[\[\+([^\]]+)\]\]/g, '$1')  // Оставляем только добавленный текст
+        .replace(/\[\[~([^→]+)→([^\]]+)\]\]/g, '$2')  // Оставляем только новую версию (после →)
+        .replace(/\[\[\^([^\]]+)\]\]/g, '$1')  // Оставляем текст как есть
+        .replace(/\n/g, "<br />");
+    }
   
     return parsed;
   };
@@ -162,11 +174,23 @@ export default function ResumeAdapter() {
             {/* Adapted Resume */}
             {state.adaptedResume && (
               <div className={styles.outputCard}>
-                <h2 className={styles.outputTitle}>Адаптированное резюме</h2>
+                <div className={styles.outputTitleContainer}>
+                  <h2 className={styles.outputTitle}>Адаптированное резюме</h2>
+                  <label className={styles.toggleContainer}>
+                    <span className={styles.toggleLabel}>Показать изменения</span>
+                    <input
+                      type="checkbox"
+                      checked={state.showChanges}
+                      onChange={(e) => setState((prev)=>({...prev, showChanges: e.target.checked}))}
+                      className={styles.toggleInput}
+                    />
+                    <span className={styles.toggleSlider}></span>
+                  </label>
+                </div>
                 <div className={styles.outputContent}>
                   <div
                     className={styles.htmlContent}
-                    dangerouslySetInnerHTML={{ __html: parseResume(state.adaptedResume) }}
+                    dangerouslySetInnerHTML={{ __html: parseResume(state.adaptedResume, state.showChanges) }}
                   />
                 </div>
               </div>

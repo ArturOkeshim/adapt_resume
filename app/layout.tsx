@@ -14,7 +14,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {children}
-        <Analytics />
+        <Analytics mode="production"/>
       </body>
     </html>
   )
