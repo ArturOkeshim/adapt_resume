@@ -1,12 +1,17 @@
 import OpenAI from 'openai';
+import { Language } from '@/lib/translations';
 export async function POST(request: Request) {
 
     
     const AI_MODEL = 'x-ai/grok-4-fast-thinking';
-    const { vacancy, resume } = await request.json();
+    const { vacancy, resume, language = 'ru' } = await request.json();
     const BASE_URL = "https://api.vsegpt.ru/v1"
-    const TEMPERATURE = 0.3;
+    const TEMPERATURE_LOW = 0.3;
+    const TEMPERATURE_HIGH = 0.7;
     let LANG = 'русский'
+    if (language==='en') {
+      LANG = 'english. Even if prompt in russian or other language, you should answer in english'
+    }
     const formatAIResponse = (text: string) => {
       if (!text) return '';
       
@@ -72,7 +77,7 @@ export async function POST(request: Request) {
 
             Новый опыт работы, должности, компании или проекты.
 
-            Новое образование, сертификаты или награды.
+            Новое образование, сертификаты, награды, специальности, специализации. 
 
             Количественные показатели (цифры, проценты, сроки), которых нет в исходном резюме.
 
@@ -167,8 +172,12 @@ export async function POST(request: Request) {
         Максимально используй термины из описания вакансии.
 
         Подсветка должна быть полезной, но не загромождать текст.
+
+    И если запрос выглядит не как профессиональное резюме - ничего страшного,
+    все равно адаптируй его как получится.
     `
     const recommendations_prompt =`
+    Текст ответа должен быть ${LANG}
     Ты адаптировала резюме под вакансию. В резюме появились новые формулировки и изменения. 
 
     1. Очень кратко опиши, какие изменения и зачем ты внесла. Не нужно пояснять, какими символами пометила изменение - пользователь видит, что поменялось.
@@ -200,7 +209,7 @@ export async function POST(request: Request) {
               content: `${vacancy}`
           }
       ],
-      temperature: TEMPERATURE
+      temperature: TEMPERATURE_LOW
     });
     const adaptedResume = adaptedResumeCompletion.choices[0].message.content;
 
@@ -228,7 +237,7 @@ export async function POST(request: Request) {
             content: `${recommendations_prompt}`
           }
       ],
-      temperature: TEMPERATURE
+      temperature: TEMPERATURE_HIGH
     });
     let recommendationsAndChances = recommendationsCompletion.choices[0].message.content || '';
     let parts = recommendationsAndChances.split('---');

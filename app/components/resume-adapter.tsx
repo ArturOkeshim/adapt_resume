@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import styles from "./resume-adapter.module.css"
+import { getTranslations, Language } from '@/lib/translations'
 
 interface AdapterState {
   vacancy: string
@@ -12,6 +13,7 @@ interface AdapterState {
   error: string
   isLoading: boolean
   showChanges: boolean
+  language: Language
 }
 
 export default function ResumeAdapter() {
@@ -23,8 +25,13 @@ export default function ResumeAdapter() {
     chances: "",
     error: "",
     isLoading: false,
-    showChanges: true
+    showChanges: true,
+    language: "ru"
   })
+
+  // Получаем переводы для текущего языка (пересчитывается при смене языка)
+  const texts = useMemo(() => getTranslations(state.language), [state.language])
+
 
   // Parse special markup: [[+text]], [[~old→new]], [[^text]]
   const parseResume = (text: string, showChanges: boolean = true) => {
@@ -85,6 +92,7 @@ export default function ResumeAdapter() {
         body: JSON.stringify({
           vacancy: state.vacancy,
           resume: state.resume,
+          language: state.language
         }),
       })
 
@@ -124,20 +132,34 @@ export default function ResumeAdapter() {
       <div className={styles.wrapper}>
         {/* Header */}
         <header className={styles.header}>
-          <h1 className={styles.title}>Адаптируй резюме под вакансию</h1>
+          <h1 className={styles.title}>{texts.title}</h1>
+          <div className={styles.languageSwitcher}>
+            <button
+              className={`${styles.langButton} ${state.language === 'en' ? styles.langButtonActive : ''}`}
+              onClick={() => setState(prev => ({ ...prev, language: 'en' }))}
+            >
+              English
+            </button>
+            <button
+              className={`${styles.langButton} ${state.language === 'ru' ? styles.langButtonActive : ''}`}
+              onClick={() => setState(prev => ({ ...prev, language: 'ru' }))}
+            >
+              Русский
+            </button>
+          </div>
         </header>
 
         {/* Input Section */}
         <section className={styles.inputSection}>
           <div className={styles.inputColumn}>
             <label className={styles.label} htmlFor="vacancy">
-              Скопируй и вставь текст вакансии
+              {texts.label.vacancy}
             </label>
             <textarea
               id="vacancy"
               className={styles.textarea}
               rows={10}
-              placeholder="Вставьте описание вакансии здесь..."
+              placeholder={texts.placeholder.vacancy}
               value={state.vacancy}
               onChange={(e) => setState((prev) => ({ ...prev, vacancy: e.target.value }))}
               disabled={state.isLoading}
@@ -146,13 +168,13 @@ export default function ResumeAdapter() {
 
           <div className={styles.inputColumn}>
             <label className={styles.label} htmlFor="resume">
-              Скопируй и вставь текст резюме
+              {texts.label.resume}
             </label>
             <textarea
               id="resume"
               className={styles.textarea}
               rows={10}
-              placeholder="Вставьте ваше резюме здесь..."
+              placeholder={texts.placeholder.resume}
               value={state.resume}
               onChange={(e) => setState((prev) => ({ ...prev, resume: e.target.value }))}
               disabled={state.isLoading}
@@ -165,12 +187,12 @@ export default function ResumeAdapter() {
 
         {/* Action Button */}
         <button className={styles.submitButton} onClick={handleSubmit} disabled={state.isLoading}>
-          {state.isLoading ? "Обработка..." : "Адаптировать"}
+          {state.isLoading ? texts.button.processing : texts.button.adapt}
         </button>
         {/* Chances */}
         {state.chances && (
           <div className={styles.outputCard}>
-            <h2 className={styles.outputTitle}>Насколько получилось увеличить соответствие вакансии?</h2>
+            <h2 className={styles.outputTitle}>{texts.output.chancesTitle}</h2>
             <div className={styles.chancesContent}>{state.chances}</div>
           </div>
         )}
@@ -181,9 +203,9 @@ export default function ResumeAdapter() {
             {state.adaptedResume && (
               <div className={styles.outputCard}>
                 <div className={styles.outputTitleContainer}>
-                  <h2 className={styles.outputTitle}>Адаптированное резюме</h2>
+                  <h2 className={`${styles.outputTitle} ${styles.outputTitleTransparent}`}>{texts.output.adaptedResumeTitle}</h2>
                   <label className={styles.toggleContainer}>
-                    <span className={styles.toggleLabel}>Показать изменения</span>
+                    <span className={styles.toggleLabel}>{state.showChanges ? texts.output.hideChanges : texts.output.showChanges}</span>
                     <input
                       type="checkbox"
                       checked={state.showChanges}
@@ -205,7 +227,7 @@ export default function ResumeAdapter() {
             {/* Recommendations */}
             {state.recommendations && (
               <div className={styles.outputCard}>
-                <h2 className={styles.outputTitle}>Рекомендации по подготовке к интервью</h2>
+                <h2 className={styles.outputTitle}>{texts.output.recommendationsTitle}</h2>
                 <div className={styles.outputContent}>
                   <div
                     className={styles.htmlContent}

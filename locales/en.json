@@ -1,0 +1,23 @@
+{
+    "title": "Adapt resume to a vacancy",
+    "label": {
+      "vacancy": "Copy and paste the job description",
+      "resume": "Copy and paste your resume"
+    },
+    "placeholder": {
+      "vacancy": "Paste the job description here...",
+      "resume": "Paste your resume here..."
+    },
+    "button": {
+      "adapt": "Adapt",
+      "processing": "Processing..."
+    },
+    "error": "Error",
+    "output": {
+      "chancesTitle": "How much did we improve the match with the vacancy?",
+      "adaptedResumeTitle": "Adapted Resume",
+      "showChanges": "Show changes",
+      "hideChanges": "Hide changes",
+      "recommendationsTitle": "Interview preparation recommendations"
+    }
+  }
