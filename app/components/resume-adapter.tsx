@@ -148,6 +148,13 @@ export default function ResumeAdapter() {
             </button>
           </div>
         </header>
+        
+        {/* Info Block */}
+        <div className={styles.infoBlock}>
+          <p className={styles.infoText}>
+            {texts.lending}
+          </p>
+        </div>
 
         {/* Input Section */}
         <section className={styles.inputSection}>
@@ -215,6 +222,25 @@ export default function ResumeAdapter() {
                     <span className={styles.toggleSlider}></span>
                   </label>
                 </div>
+                {state.showChanges && (
+                  <div className={styles.legendContainer}>
+                    <span className={styles.legendTitle}>{texts.output.legend.title}</span>
+                    <div className={styles.legendItems}>
+                      <div className={styles.legendItem}>
+                        <span className={`${styles.legendColor} ${styles.legendColorDeleted}`}></span>
+                        <span className={styles.legendText}>{texts.output.legend.deleted}</span>
+                      </div>
+                      <div className={styles.legendItem}>
+                        <span className={`${styles.legendColor} ${styles.legendColorReplaced}`}></span>
+                        <span className={styles.legendText}>{texts.output.legend.replaced}</span>
+                      </div>
+                      <div className={styles.legendItem}>
+                        <span className={`${styles.legendColor} ${styles.legendColorNew}`}></span>
+                        <span className={styles.legendText}>{texts.output.legend.new}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className={styles.outputContent}>
                   <div
                     className={styles.htmlContent}

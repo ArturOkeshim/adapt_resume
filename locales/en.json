@@ -1,5 +1,6 @@
 {
     "title": "Adapt resume to a vacancy",
+    "lending": "Often, applications are rejected because your resume lacks the right keywords from the job description. Our service automatically adds the necessary phrases and skills to ensure your resume passes the ATS screening and gets seen by an HR manager.",
     "label": {
       "vacancy": "Copy and paste the job description",
       "resume": "Copy and paste your resume"
@@ -18,6 +19,12 @@
       "adaptedResumeTitle": "Adapted Resume",
       "showChanges": "Show changes",
       "hideChanges": "Hide changes",
-      "recommendationsTitle": "Interview preparation recommendations"
+      "recommendationsTitle": "Interview preparation recommendations",
+      "legend": {
+        "title": "Legend:",
+        "deleted": "Deleted text",
+        "replaced": "Replacement",
+        "new": "New skills/formulations"
+      }
     }
   }
